@@ -439,47 +439,51 @@
             });
         });
 
-        // CTA Form Handler
-            async function handleCTASubmit() {
-                const email = document.getElementById('ctaEmail').value;
-                const button = event.target;
+        // CTA Form Handler - FIXED VERSION
+        async function handleCTASubmit() {
+            const email = document.getElementById('ctaEmail').value;
+            
+            // Validate email
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+            
+            // ⚠️ IMPORTANT: Replace this with YOUR actual Google Apps Script web app URL
+            const webAppUrl = 'https://script.google.com/macros/library/d/1jR-E0g3Ip2Y4MJmbTxTMPUObfnvrk59oS9MwKlolz7EDl8y7THo0Rdf7/1';
+            
+            // Check if URL is still placeholder
+            if (webAppUrl.includes('PASTE_YOUR') || webAppUrl.includes('YOUR_ACTUAL')) {
+                alert('⚠️ Developer Note: Please update the webAppUrl in the code with your actual Google Apps Script URL.');
+                return;
+            }
+            
+            try {
+                // Use a simpler fetch without mode restriction first
+                const response = await fetch(webAppUrl, {
+                    redirect: 'follow',
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8',
+                    },
+                    body: JSON.stringify({ email: email }),
+                });
                 
-                // Validate email
-                if (!email || !email.includes('@')) {
-                    alert('Please enter a valid email address.');
-                    return;
-                }
+                // Success! (Even if we can't read the response due to CORS)
+                alert('✅ Thank you for your interest! We will contact you shortly at ' + email);
+                document.getElementById('ctaEmail').value = '';
                 
-                // Replace this with YOUR actual Google Apps Script web app URL
-                const webAppUrl = 'https://script.google.com/macros/s/AKfycbwVKFuoy9MM8oHeM398mkw73kxugHR9U7u4DP8UaKhYqirXknFeZ9-qfhwEgGiRGxs4/exec';
+            } catch (error) {
+                console.error('Detailed error:', error);
                 
-                // Disable button during submission
-                button.disabled = true;
-                button.textContent = 'Sending...';
-                
-                try {
-                    const response = await fetch(webAppUrl, {
-                        method: 'POST',
-                        mode: 'no-cors', // Important for Google Apps Script
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ email: email }),
-                    });
-                    
-                    // With no-cors mode, we can't read the response, but if no error is thrown, it worked
-                    alert('Thank you for your interest! We will contact you shortly at ' + email);
-                    document.getElementById('ctaEmail').value = ''; // Clear the input
-                    
-                } catch (error) {
-                    console.error('Submission error:', error);
-                    alert('There was an error submitting your email. Please try again or contact us directly at (555) 123-4567');
-                } finally {
-                    // Re-enable button
-                    button.disabled = false;
-                    button.textContent = 'Get Started';
+                // More specific error message
+                if (error.message.includes('Failed to fetch')) {
+                    alert('❌ Unable to connect to the server. Please ensure:\n\n1. You have internet connection\n2. The Google Apps Script is deployed correctly\n3. Try calling us directly at (555) 123-4567');
+                } else {
+                    alert('❌ Error: ' + error.message + '\n\nPlease contact us at (555) 123-4567');
                 }
             }
+        }
 
   
 
