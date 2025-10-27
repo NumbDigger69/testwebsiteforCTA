@@ -440,37 +440,47 @@
         });
 
         // CTA Form Handler
-        async function handleCTASubmit() {
-            const email = document.getElementById('ctaEmail').value;
-            
-            if (!email || !email.includes('@')) {
-                alert('Please enter a valid email address.');
-                return;
-            }
-            
-            const webAppUrl = 'https://script.google.com/macros/s/AKfycbwVKFuoy9MM8oHeM398mkw73kxugHR9U7u4DP8UaKhYqirXknFeZ9-qfhwEgGiRGxs4/exec'; // Replace with your actual Google Apps Script web app URL
-            
-            try {
-                const response = await fetch(webAppUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email: email }),
-                });
+            async function handleCTASubmit() {
+                const email = document.getElementById('ctaEmail').value;
+                const button = event.target;
                 
-                const result = await response.json();
+                // Validate email
+                if (!email || !email.includes('@')) {
+                    alert('Please enter a valid email address.');
+                    return;
+                }
                 
-                if (result.success) {
+                // Replace this with YOUR actual Google Apps Script web app URL
+                const webAppUrl = 'https://script.google.com/macros/s/AKfycbwVKFuoy9MM8oHeM398mkw73kxugHR9U7u4DP8UaKhYqirXknFeZ9-qfhwEgGiRGxs4/exec';
+                
+                // Disable button during submission
+                button.disabled = true;
+                button.textContent = 'Sending...';
+                
+                try {
+                    const response = await fetch(webAppUrl, {
+                        method: 'POST',
+                        mode: 'no-cors', // Important for Google Apps Script
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email: email }),
+                    });
+                    
+                    // With no-cors mode, we can't read the response, but if no error is thrown, it worked
                     alert('Thank you for your interest! We will contact you shortly at ' + email);
                     document.getElementById('ctaEmail').value = ''; // Clear the input
-                } else {
-                    alert('There was an error submitting your email. Please try again.');
+                    
+                } catch (error) {
+                    console.error('Submission error:', error);
+                    alert('There was an error submitting your email. Please try again or contact us directly at (555) 123-4567');
+                } finally {
+                    // Re-enable button
+                    button.disabled = false;
+                    button.textContent = 'Get Started';
                 }
-            } catch (error) {
-                alert('Network error. Please check your connection and try again.');
             }
-        }
+
   
 
 
